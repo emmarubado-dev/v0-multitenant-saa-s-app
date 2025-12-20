@@ -66,10 +66,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const response = await authService.login(credentials)
       console.log("[v0] Login response received:", response)
 
-      setAuthToken(response.token)
+      setAuthToken(response.accessToken)
       console.log("[v0] Token saved and cookie set")
 
-      const tokenPayload = decodeToken(response.token)
+      const tokenPayload = decodeToken(response.accessToken)
       console.log("[v0] Decoded token payload:", tokenPayload)
 
       const userData: User = {
