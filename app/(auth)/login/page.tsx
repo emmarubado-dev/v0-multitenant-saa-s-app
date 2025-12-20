@@ -2,7 +2,8 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { useAuth } from "@/contexts/auth-context"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -12,25 +13,45 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, Building2 } from "lucide-react"
 
 export default function LoginPage() {
-  const { login } = useAuth()
+  const { login, user } = useAuth()
+  const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    console.log("[v0] Login page - checking user:", user?.email || "none")
+    if (user) {
+      console.log("[v0] User already authenticated, redirecting to dashboard")
+      router.push("/dashboard")
+    }
+  }, [user, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
     setIsLoading(true)
 
+    console.log("[v0] Login form submitted")
+
     try {
       await login({ email, password })
+      console.log("[v0] Login successful")
     } catch (err) {
+      console.error("[v0] Login failed:", err)
       setError("Credenciales inválidas. Por favor, intente nuevamente.")
-      console.error("Login error:", err)
     } finally {
       setIsLoading(false)
     }
+  }
+
+  if (user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
   }
 
   return (

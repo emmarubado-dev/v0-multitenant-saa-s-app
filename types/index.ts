@@ -5,10 +5,7 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  accessToken: string
-  refreshToken: string
-  user: UserResponse
-  tenants: TenantResponse[]
+  token: string
 }
 
 export interface User {
@@ -129,4 +126,12 @@ export interface PaginatedResponse<T> {
   totalCount: number
   pageNumber: number
   pageSize: number
+}
+
+// Token Types
+export interface TokenPayload {
+  userId: string
+  email?: string
+  exp?: number
+  iat?: number
 }

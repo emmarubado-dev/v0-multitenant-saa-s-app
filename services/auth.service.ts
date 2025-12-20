@@ -4,17 +4,13 @@ import type { LoginRequest, LoginResponse } from "@/types"
 export const authService = {
   async login(credentials: LoginRequest): Promise<LoginResponse> {
     const response = await apiClient.post<LoginResponse>("/api/v1/auth/login", credentials)
+    console.log("[v0] Login response:", response.data)
     return response.data
   },
 
-  async refresh(refreshToken: string): Promise<LoginResponse> {
-    const response = await apiClient.post<LoginResponse>("/api/v1/auth/refresh", refreshToken)
-    return response.data
-  },
-
-  async logout(refreshToken: string): Promise<void> {
+  async logout(): Promise<void> {
     try {
-      await apiClient.post("/api/v1/auth/revoke", refreshToken)
+      await apiClient.post("/api/v1/auth/revoke", {})
     } catch (error) {
       console.error("Error during logout:", error)
     }

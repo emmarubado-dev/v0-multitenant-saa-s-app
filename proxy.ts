@@ -13,8 +13,6 @@ export function proxy(request: NextRequest) {
 
   // Si es ruta pública y está autenticado, redirigir al dashboard
   if (isPublicRoute && token) {
-    console.log("Redirecting to dashboard")
-    console.log(request.url)
     return NextResponse.redirect(new URL("/dashboard", request.url))
   }
 

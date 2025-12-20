@@ -5,7 +5,14 @@ import { useRouter } from "next/navigation"
 import { authService } from "@/services/auth.service"
 import { tenantService } from "@/services/tenant.service"
 import type { LoginRequest, User, TenantResponse } from "@/types"
-import { setAuthData, getAuthData, clearAuthData, setSelectedTenant as setStoredTenant } from "@/lib/auth"
+import {
+  setAuthToken,
+  setUserData,
+  getAuthData,
+  clearAuthData,
+  setSelectedTenant as setStoredTenant,
+  decodeToken,
+} from "@/lib/auth"
 
 interface AuthContextType {
   user: User | null
@@ -28,7 +35,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const initAuth = async () => {
+      console.log("[v0] Initializing auth context...")
       const authData = getAuthData()
+      console.log("[v0] Auth data from storage:", authData ? "exists" : "none")
 
       if (authData) {
         setUser(authData.user)
@@ -37,13 +46,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Cargar tenants disponibles
         try {
           const tenantsData = await tenantService.getAll()
+          console.log("[v0] Tenants loaded:", tenantsData.length)
           setTenants(tenantsData)
         } catch (error) {
-          console.error("Error loading tenants:", error)
+          console.error("[v0] Error loading tenants:", error)
         }
       }
 
       setIsLoading(false)
+      console.log("[v0] Auth initialization complete. User:", authData?.user?.email || "none")
     }
 
     initAuth()
@@ -51,39 +62,63 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (credentials: LoginRequest) => {
     try {
+      console.log("[v0] Login attempt for:", credentials.email)
       const response = await authService.login(credentials)
-      console.log("Login response:", response)
+      console.log("[v0] Login response received:", response)
 
-      setAuthData(response)
-      setUser(response.user)
-      setTenants(response.tenants || [])
+      setAuthToken(response.token)
+      console.log("[v0] Token saved and cookie set")
 
-      if (response.tenants && response.tenants.length > 0) {
-        setSelectedTenantIdState(response.tenants[0].id)
+      const tokenPayload = decodeToken(response.token)
+      console.log("[v0] Decoded token payload:", tokenPayload)
+
+      const userData: User = {
+        id: tokenPayload.userId || tokenPayload.sub || "",
+        name: tokenPayload.name || credentials.email.split("@")[0],
+        email: tokenPayload.email || credentials.email,
+        isActive: true,
       }
 
+      setUserData(userData)
+      setUser(userData)
+      console.log("[v0] User data set:", userData)
+
+      try {
+        const tenantsData = await tenantService.getAll()
+        console.log("[v0] Tenants loaded after login:", tenantsData.length)
+        setTenants(tenantsData)
+
+        if (tenantsData.length > 0) {
+          setSelectedTenantIdState(tenantsData[0].id)
+          setStoredTenant(tenantsData[0].id)
+          console.log("[v0] Selected first tenant:", tenantsData[0].id)
+        }
+      } catch (error) {
+        console.error("[v0] Error loading tenants after login:", error)
+      }
+
+      console.log("[v0] Redirecting to dashboard...")
       router.push("/dashboard")
+      router.refresh()
     } catch (error) {
-      console.error("Login error:", error)
+      console.error("[v0] Login error:", error)
       throw error
     }
   }
 
   const logout = async () => {
-    const authData = getAuthData()
-
-    if (authData?.refreshToken) {
-      await authService.logout(authData.refreshToken)
-    }
-
+    console.log("[v0] Logging out...")
+    await authService.logout()
     clearAuthData()
     setUser(null)
     setTenants([])
     setSelectedTenantIdState(null)
+    console.log("[v0] Logout complete, redirecting to login...")
     router.push("/login")
   }
 
   const setSelectedTenant = (tenantId: string) => {
+    console.log("[v0] Selecting tenant:", tenantId)
     setStoredTenant(tenantId)
     setSelectedTenantIdState(tenantId)
   }
