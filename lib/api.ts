@@ -1,7 +1,7 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios"
 
 // Base URL de la API (ajustar según necesidad)
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://localhost:7054"
 
 // Cliente axios configurado
 export const apiClient = axios.create({
