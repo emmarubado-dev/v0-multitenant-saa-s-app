@@ -13,6 +13,7 @@ export interface User {
   id: string
   name: string
   email: string
+  isOwner: boolean
   tenantId?: string
   roleId?: number
   isActive: boolean
@@ -46,6 +47,7 @@ export interface UserResponse {
   id: string
   name: string
   email: string
+  isOwner: boolean
   tenantId?: string
   roleId?: number
   isActive: boolean
@@ -132,7 +134,16 @@ export interface PaginatedResponse<T> {
 // Token Types
 export interface TokenPayload {
   userId: string
-  email?: string
+  name: string
+  email: string
+  isowner: string
   exp?: number
   iat?: number
+}
+
+// User Permissions Types
+export interface UserPermissions {
+  userId: string
+  tenantId: string
+  actions: string[]
 }

@@ -20,11 +20,11 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Tenants", href: "/dashboard/tenants", icon: Building2 },
-  { name: "Usuarios", href: "/dashboard/users", icon: Users },
-  { name: "Roles", href: "/dashboard/roles", icon: Shield },
-  { name: "Owners", href: "/dashboard/owners", icon: Crown },
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, ownerOnly: false },
+  { name: "Tenants", href: "/dashboard/tenants", icon: Building2, ownerOnly: false },
+  { name: "Usuarios", href: "/dashboard/users", icon: Users, ownerOnly: false },
+  { name: "Roles", href: "/dashboard/roles", icon: Shield, ownerOnly: false },
+  { name: "Owners", href: "/dashboard/owners", icon: Crown, ownerOnly: true },
 ]
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -43,6 +43,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
   const selectedTenant = tenants.find((t) => t.id === selectedTenantId)
 
+  const filteredNavigation = navigation.filter((item) => !item.ownerOnly || user?.isOwner)
+
   return (
     <div className="min-h-screen bg-background">
       {/* Sidebar para desktop */}
@@ -58,7 +60,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             <ul role="list" className="flex flex-1 flex-col gap-y-7">
               <li>
                 <ul role="list" className="-mx-2 space-y-1">
-                  {navigation.map((item) => {
+                  {filteredNavigation.map((item) => {
                     const isActive = pathname === item.href
                     return (
                       <li key={item.name}>
@@ -108,7 +110,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 <ul role="list" className="flex flex-1 flex-col gap-y-7">
                   <li>
                     <ul role="list" className="-mx-2 space-y-1">
-                      {navigation.map((item) => {
+                      {filteredNavigation.map((item) => {
                         const isActive = pathname === item.href
                         return (
                           <li key={item.name}>
@@ -148,7 +150,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
             <div className="flex flex-1 items-center">
               <h1 className="text-lg font-semibold text-foreground">
-                {navigation.find((item) => item.href === pathname)?.name || "Dashboard"}
+                {filteredNavigation.find((item) => item.href === pathname)?.name || "Dashboard"}
               </h1>
             </div>
 
@@ -201,6 +203,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                     <div className="flex flex-col space-y-1">
                       <p className="text-sm font-medium leading-none">{user?.name}</p>
                       <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
+                      {user?.isOwner && <p className="text-xs leading-none text-primary font-medium">Owner</p>}
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
