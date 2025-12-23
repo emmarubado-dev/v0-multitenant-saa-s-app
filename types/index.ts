@@ -45,29 +45,38 @@ export interface UpdateTenantRequest {
 // User Types
 export interface UserResponse {
   id: string
-  username:string
-  name: string
+  ownerId: string
+  firstName: string
+  lastName: string
+  username: string
   email: string
-  isOwner: boolean
+  phoneCountryCode: string
+  phoneAreaCode: string
+  phoneNumber: string
+  isAdmin: boolean
   enabled: boolean
   createdAt: string
-}
-
-export interface CreateUserRequest {
-  name: string
-  email: string
-  password: string
-  tenantId?: string
-  roleId?: number
-}
-
-export interface UpdateUserRequest {
-  id: string
-  name: string
-  email: string
   tenantId?: string
   roleId?: number
   isActive: boolean
+}
+
+export interface CreateUserRequest {
+  ownerId: string
+  firstName: string
+  lastName: string
+  username: string
+  email: string
+  password: string
+  phoneCountryCode: string
+  phoneAreaCode: string
+  phoneNumber: string
+  isAdmin: boolean
+  enabled: boolean
+}
+
+export interface UpdateUserRequest extends CreateUserRequest {
+  id: string
 }
 
 // Role Types
@@ -94,31 +103,67 @@ export interface UpdateRoleRequest {
 // Owner Types
 export interface OwnerResponse {
   id: string
-  name: string
+  firstName: string
+  lastName: string
   email: string
+  docType: string
+  docNumber: string
+  phoneCountryCode: string
+  phoneAreaCode: string
+  phoneNumber: string
+  streetName: string
+  streetNumber: string
+  floor?: string
+  apartment?: string
+  city: string
+  state: string
+  zipCode: string
   isActive: boolean
   createdAt: string
   tenantsCount?: number
 }
 
 export interface CreateOwnerRequest {
-  name: string
+  firstName: string
+  lastName: string
   email: string
   password: string
+  docType: string
+  docNumber: string
+  phoneCountryCode: string
+  phoneAreaCode: string
+  phoneNumber: string
+  streetName: string
+  streetNumber: string
+  floor?: string
+  apartment?: string
+  city: string
+  state: string
+  zipCode: string
 }
 
-export interface UpdateOwnerRequest {
+export interface UpdateOwnerRequest extends CreateOwnerRequest {
   id: string
+}
+
+// Action types for role-action management
+export interface ActionDto {
+  id: number
   name: string
-  email: string
-  isActive: boolean
+}
+
+export interface RoleActionCreateRequest {
+  actionId: number
+  roleId: string
 }
 
 // API Response Types
 export interface ApiError {
-  message: string
+  title?: string
+  status?: number
+  instance?: string
+  traceId?: string
   errors?: Record<string, string[]>
-  statusCode?: number
 }
 
 export interface PaginatedResponse<T> {

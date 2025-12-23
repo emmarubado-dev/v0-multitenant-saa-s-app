@@ -1,10 +1,11 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
 import { userService } from "@/services/user.service"
-import type { UserResponse, TenantResponse, RoleResponse, CreateUserRequest, UpdateUserRequest } from "@/types"
+import { ownerService } from "@/services/owner.service"
+import type { UserResponse, OwnerResponse, CreateUserRequest, UpdateUserRequest } from "@/types"
+import { getErrorMessage, getFieldErrors } from "@/lib/error-handler"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -20,63 +21,92 @@ import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 interface UserDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   user: UserResponse | null
-  tenants: TenantResponse[]
-  roles: RoleResponse[]
   onSuccess: () => void
 }
 
-export function UserDialog({ open, onOpenChange, user, tenants, roles, onSuccess }: UserDialogProps) {
+export function UserDialog({ open, onOpenChange, user, onSuccess }: UserDialogProps) {
   const [isLoading, setIsLoading] = useState(false)
-  const [formData, setFormData] = useState({
-    name: "",
+  const [owners, setOwners] = useState<OwnerResponse[]>([])
+  const [formData, setFormData] = useState<CreateUserRequest>({
+    ownerId: "",
+    firstName: "",
+    lastName: "",
+    username: "",
     email: "",
     password: "",
-    tenantId: "",
-    roleId: "",
-    isActive: true,
+    phoneCountryCode: "",
+    phoneAreaCode: "",
+    phoneNumber: "",
+    isAdmin: false,
+    enabled: true,
   })
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({})
   const { toast } = useToast()
+
+  useEffect(() => {
+    if (open) {
+      loadOwners()
+    }
+  }, [open])
 
   useEffect(() => {
     if (user) {
       setFormData({
-        name: user.name,
+        ownerId: user.ownerId,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        username: user.username,
         email: user.email,
         password: "",
-        tenantId: user.tenantId || "",
-        roleId: user.roleId?.toString() || "",
-        isActive: user.isActive,
+        phoneCountryCode: user.phoneCountryCode,
+        phoneAreaCode: user.phoneAreaCode,
+        phoneNumber: user.phoneNumber,
+        isAdmin: user.isAdmin,
+        enabled: user.enabled,
       })
     } else {
       setFormData({
-        name: "",
+        ownerId: "",
+        firstName: "",
+        lastName: "",
+        username: "",
         email: "",
         password: "",
-        tenantId: "",
-        roleId: "",
-        isActive: true,
+        phoneCountryCode: "",
+        phoneAreaCode: "",
+        phoneNumber: "",
+        isAdmin: false,
+        enabled: true,
       })
     }
-  }, [user])
+    setFieldErrors({})
+  }, [user, open])
+
+  const loadOwners = async () => {
+    try {
+      const data = await ownerService.getAll()
+      setOwners(data)
+    } catch (error) {
+      console.error("[v0] Error loading owners:", error)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
+    setFieldErrors({})
 
     try {
       if (user) {
         const updateData: UpdateUserRequest = {
+          ...formData,
           id: user.id,
-          name: formData.name,
-          email: formData.email,
-          tenantId: formData.tenantId || undefined,
-          roleId: formData.roleId ? Number.parseInt(formData.roleId) : undefined,
-          isActive: formData.isActive,
         }
         await userService.update(updateData)
         toast({
@@ -84,34 +114,21 @@ export function UserDialog({ open, onOpenChange, user, tenants, roles, onSuccess
           description: "Usuario actualizado correctamente",
         })
       } else {
-        if (!formData.password) {
-          toast({
-            title: "Error",
-            description: "La contraseña es requerida para crear un usuario",
-            variant: "destructive",
-          })
-          setIsLoading(false)
-          return
-        }
-
-        const createData: CreateUserRequest = {
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-          tenantId: formData.tenantId || undefined,
-          roleId: formData.roleId ? Number.parseInt(formData.roleId) : undefined,
-        }
-        await userService.create(createData)
+        await userService.create(formData)
         toast({
           title: "Éxito",
           description: "Usuario creado correctamente",
         })
       }
       onSuccess()
+      onOpenChange(false)
     } catch (error) {
+      const errors = getFieldErrors(error)
+      setFieldErrors(errors)
+
       toast({
         title: "Error",
-        description: `No se pudo ${user ? "actualizar" : "crear"} el usuario`,
+        description: getErrorMessage(error),
         variant: "destructive",
       })
     } finally {
@@ -119,9 +136,13 @@ export function UserDialog({ open, onOpenChange, user, tenants, roles, onSuccess
     }
   }
 
+  const getFieldError = (fieldName: string): string | undefined => {
+    return fieldErrors[fieldName]?.[0]
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[525px]">
+      <DialogContent className="sm:max-w-[600px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>{user ? "Editar Usuario" : "Nuevo Usuario"}</DialogTitle>
@@ -130,102 +151,214 @@ export function UserDialog({ open, onOpenChange, user, tenants, roles, onSuccess
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="name">
-                Nombre <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                required
-                disabled={isLoading}
-                placeholder="Juan Pérez"
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="email">
-                Email <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                required
-                disabled={isLoading}
-                placeholder="juan@ejemplo.com"
-              />
-            </div>
-
-            {!user && (
+          <ScrollArea className="max-h-[60vh] pr-4">
+            <div className="grid gap-4 py-4">
+              {/* Owner Selection */}
               <div className="grid gap-2">
-                <Label htmlFor="password">
-                  Contraseña <span className="text-destructive">*</span>
+                <Label htmlFor="ownerId">
+                  Owner <span className="text-destructive">*</span>
                 </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  required
-                  disabled={isLoading}
-                  placeholder="••••••••"
-                />
+                <Select
+                  value={formData.ownerId}
+                  onValueChange={(value) => setFormData({ ...formData, ownerId: value })}
+                >
+                  <SelectTrigger className={getFieldError("OwnerId") ? "border-destructive" : ""}>
+                    <SelectValue placeholder="Seleccionar owner" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {owners.map((owner) => (
+                      <SelectItem key={owner.id} value={owner.id}>
+                        {owner.firstName} {owner.lastName} - {owner.email}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {getFieldError("OwnerId") && <p className="text-xs text-destructive">{getFieldError("OwnerId")}</p>}
               </div>
-            )}
 
-            <div className="grid gap-2">
-              <Label htmlFor="tenantId">Tenant</Label>
-              <Select
-                value={formData.tenantId}
-                onValueChange={(value) => setFormData({ ...formData, tenantId: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar tenant" />
-                </SelectTrigger>
-                <SelectContent>
-                  {tenants.map((tenant) => (
-                    <SelectItem key={tenant.id} value={tenant.id}>
-                      {tenant.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+              {/* Personal Information */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium">Información Personal</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="firstName">
+                      Nombre <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      id="firstName"
+                      value={formData.firstName}
+                      onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                      disabled={isLoading}
+                      placeholder="Juan"
+                      maxLength={50}
+                      className={getFieldError("FirstName") ? "border-destructive" : ""}
+                    />
+                    {getFieldError("FirstName") && (
+                      <p className="text-xs text-destructive">{getFieldError("FirstName")}</p>
+                    )}
+                  </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="roleId">Rol</Label>
-              <Select value={formData.roleId} onValueChange={(value) => setFormData({ ...formData, roleId: value })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar rol" />
-                </SelectTrigger>
-                <SelectContent>
-                  {roles.map((role) => (
-                    <SelectItem key={role.id} value={role.id.toString()}>
-                      {role.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="lastName">
+                      Apellido <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      id="lastName"
+                      value={formData.lastName}
+                      onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                      disabled={isLoading}
+                      placeholder="Pérez"
+                      maxLength={50}
+                      className={getFieldError("LastName") ? "border-destructive" : ""}
+                    />
+                    {getFieldError("LastName") && (
+                      <p className="text-xs text-destructive">{getFieldError("LastName")}</p>
+                    )}
+                  </div>
+                </div>
 
-            {user && (
-              <div className="flex items-center justify-between">
-                <Label htmlFor="isActive">Estado Activo</Label>
-                <Switch
-                  id="isActive"
-                  checked={formData.isActive}
-                  onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
-                  disabled={isLoading}
-                />
+                <div className="grid gap-2">
+                  <Label htmlFor="username">
+                    Nombre de Usuario <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="username"
+                    value={formData.username}
+                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                    disabled={isLoading}
+                    placeholder="juanperez"
+                    maxLength={50}
+                    className={getFieldError("Username") ? "border-destructive" : ""}
+                  />
+                  {getFieldError("Username") && <p className="text-xs text-destructive">{getFieldError("Username")}</p>}
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="email">
+                    Email <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    disabled={isLoading}
+                    placeholder="juan@ejemplo.com"
+                    maxLength={255}
+                    className={getFieldError("Email") ? "border-destructive" : ""}
+                  />
+                  {getFieldError("Email") && <p className="text-xs text-destructive">{getFieldError("Email")}</p>}
+                </div>
+
+                {!user && (
+                  <div className="grid gap-2">
+                    <Label htmlFor="password">
+                      Contraseña <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      disabled={isLoading}
+                      placeholder="Mínimo 6 caracteres"
+                      maxLength={100}
+                      className={getFieldError("Password") ? "border-destructive" : ""}
+                    />
+                    {getFieldError("Password") && (
+                      <p className="text-xs text-destructive">{getFieldError("Password")}</p>
+                    )}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
 
-          <DialogFooter>
+              {/* Phone Information */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium">Teléfono</h3>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="phoneCountryCode">
+                      País <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      id="phoneCountryCode"
+                      value={formData.phoneCountryCode}
+                      onChange={(e) => setFormData({ ...formData, phoneCountryCode: e.target.value })}
+                      disabled={isLoading}
+                      placeholder="+54"
+                      maxLength={5}
+                      className={getFieldError("PhoneCountryCode") ? "border-destructive" : ""}
+                    />
+                    {getFieldError("PhoneCountryCode") && (
+                      <p className="text-xs text-destructive">{getFieldError("PhoneCountryCode")}</p>
+                    )}
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="phoneAreaCode">
+                      Área <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      id="phoneAreaCode"
+                      value={formData.phoneAreaCode}
+                      onChange={(e) => setFormData({ ...formData, phoneAreaCode: e.target.value })}
+                      disabled={isLoading}
+                      placeholder="11"
+                      maxLength={10}
+                      className={getFieldError("PhoneAreaCode") ? "border-destructive" : ""}
+                    />
+                    {getFieldError("PhoneAreaCode") && (
+                      <p className="text-xs text-destructive">{getFieldError("PhoneAreaCode")}</p>
+                    )}
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="phoneNumber">
+                      Número <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      id="phoneNumber"
+                      value={formData.phoneNumber}
+                      onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                      disabled={isLoading}
+                      placeholder="12345678"
+                      maxLength={20}
+                      className={getFieldError("PhoneNumber") ? "border-destructive" : ""}
+                    />
+                    {getFieldError("PhoneNumber") && (
+                      <p className="text-xs text-destructive">{getFieldError("PhoneNumber")}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Permissions */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium">Permisos</h3>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="isAdmin">Es Administrador</Label>
+                  <Switch
+                    id="isAdmin"
+                    checked={formData.isAdmin}
+                    onCheckedChange={(checked) => setFormData({ ...formData, isAdmin: checked })}
+                    disabled={isLoading}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="enabled">Usuario Habilitado</Label>
+                  <Switch
+                    id="enabled"
+                    checked={formData.enabled}
+                    onCheckedChange={(checked) => setFormData({ ...formData, enabled: checked })}
+                    disabled={isLoading}
+                  />
+                </div>
+              </div>
+            </div>
+          </ScrollArea>
+
+          <DialogFooter className="mt-4">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
               Cancelar
             </Button>

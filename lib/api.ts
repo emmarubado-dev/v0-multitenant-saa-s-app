@@ -44,8 +44,15 @@ apiClient.interceptors.response.use(
     console.log("[v0] API Response:", response.status, response.config.url)
     return response
   },
-  async (error: AxiosError) => {
-    console.error("[v0] API Error:", error.response?.status, error.config?.url, error.message)
+  async (error: AxiosError<{ errors?: string[] }>) => {
+    console.error("[v0] API Error:", error.response?.status, error.config?.url)
+
+    if (error.response?.data) {
+      console.error("[v0] API Error details:", error.response.data)
+      if (error.response.data.errors) {
+        console.error("[v0] Validation errors:", error.response.data.errors)
+      }
+    }
 
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean }
 
