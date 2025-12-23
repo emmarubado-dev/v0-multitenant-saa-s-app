@@ -145,17 +145,13 @@ export default function UsersPage() {
                   </TableRow>
                 ) : (
                   users.map((user) => {
-                    const tenant = tenants.find((t) => t.id === user.tenantId)
-                    const role = roles.find((r) => r.id === user.roleId)
                     return (
                       <TableRow key={user.id}>
-                        <TableCell className="font-medium">{user.name}</TableCell>
+                        <TableCell className="font-medium">{user.username}</TableCell>
                         <TableCell>{user.email}</TableCell>
-                        <TableCell>{tenant?.name || "-"}</TableCell>
-                        <TableCell>{role?.name || "-"}</TableCell>
                         <TableCell>
-                          <Badge variant={user.isActive ? "default" : "secondary"}>
-                            {user.isActive ? "Activo" : "Inactivo"}
+                          <Badge variant={user.enabled ? "default" : "secondary"}>
+                            {user.enabled ? "Activo" : "Inactivo"}
                           </Badge>
                         </TableCell>
                         <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>

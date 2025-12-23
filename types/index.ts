@@ -45,15 +45,12 @@ export interface UpdateTenantRequest {
 // User Types
 export interface UserResponse {
   id: string
+  username:string
   name: string
   email: string
   isOwner: boolean
-  tenantId?: string
-  roleId?: number
-  isActive: boolean
+  enabled: boolean
   createdAt: string
-  roleName?: string
-  tenantName?: string
 }
 
 export interface CreateUserRequest {
