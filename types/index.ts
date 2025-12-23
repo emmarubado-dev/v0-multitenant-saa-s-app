@@ -22,12 +22,26 @@ export interface User {
 
 // Tenant Types
 export interface TenantResponse {
-  id: string
-  name: string
-  subdomain?: string
-  isActive: boolean
-  createdAt: string
-  ownerId?: string
+    id: string;
+    businessName: string;
+    fantasyName: string;
+    taxIdNumber: string;
+    countryId: number;
+    email: string;
+    phoneCountryCode: string;
+    phoneAreaCode: string;
+    phoneNumber: string;
+    streetName: string;
+    streetNumber: string;
+    floor: string | null;
+    apartment: string | null;
+    city: string;
+    state: string;
+    zipCode: string;
+    businessType: number;
+    domain: string;
+    ownerId: string;
+    vat: string;
 }
 
 export interface CreateTenantRequest {
