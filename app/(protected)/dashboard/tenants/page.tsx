@@ -116,16 +116,16 @@ export default function TenantsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="rounded-md border">
+          <div className="rounded-md border overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Nombre</TableHead>
-                  <TableHead>Subdominio</TableHead>
-                  <TableHead>Owner</TableHead>
-                  <TableHead>Estado</TableHead>
-                  <TableHead>Fecha Creación</TableHead>
-                  <TableHead className="text-right">Acciones</TableHead>
+                  <TableHead className="min-w-[200px]">Nombre</TableHead>
+                  <TableHead className="min-w-[150px]">Subdominio</TableHead>
+                  <TableHead className="min-w-[200px]">Owner</TableHead>
+                  <TableHead className="min-w-[100px]">Estado</TableHead>
+                  <TableHead className="min-w-[120px]">Fecha Creación</TableHead>
+                  <TableHead className="text-right min-w-[100px]">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -142,7 +142,7 @@ export default function TenantsPage() {
                       <TableRow key={tenant.id}>
                         <TableCell className="font-medium">{tenant.name}</TableCell>
                         <TableCell>{tenant.subdomain || "-"}</TableCell>
-                        <TableCell>{owner?.name || "-"}</TableCell>
+                        <TableCell>{owner ? `${owner.firstName} ${owner.lastName}` : "-"}</TableCell>
                         <TableCell>
                           <Badge variant={tenant.isActive ? "default" : "secondary"}>
                             {tenant.isActive ? "Activo" : "Inactivo"}
@@ -150,17 +150,19 @@ export default function TenantsPage() {
                         </TableCell>
                         <TableCell>{new Date(tenant.createdAt).toLocaleDateString()}</TableCell>
                         <TableCell className="text-right">
-                          <Button variant="ghost" size="icon" onClick={() => handleEdit(tenant)}>
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDelete(tenant)}
-                            className="text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <div className="flex justify-end gap-2">
+                            <Button variant="ghost" size="icon" onClick={() => handleEdit(tenant)}>
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDelete(tenant)}
+                              className="text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     )

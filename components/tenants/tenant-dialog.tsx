@@ -100,76 +100,78 @@ export function TenantDialog({ open, onOpenChange, tenant, owners, onSuccess }: 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[525px]">
-        <form onSubmit={handleSubmit}>
-          <DialogHeader>
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] flex flex-col">
+        <form onSubmit={handleSubmit} className="flex flex-col h-full">
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle>{tenant ? "Editar Tenant" : "Nuevo Tenant"}</DialogTitle>
             <DialogDescription>
               {tenant ? "Modifica los datos del tenant" : "Crea un nuevo tenant en el sistema"}
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="name">
-                Nombre <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                required
-                disabled={isLoading}
-                placeholder="Acme Corporation"
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="subdomain">Subdominio</Label>
-              <Input
-                id="subdomain"
-                value={formData.subdomain}
-                onChange={(e) => setFormData({ ...formData, subdomain: e.target.value })}
-                disabled={isLoading}
-                placeholder="acme"
-              />
-            </div>
-
-            {!tenant && (
+          <div className="flex-1 py-4">
+            <div className="grid gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="ownerId">Owner</Label>
-                <Select
-                  value={formData.ownerId}
-                  onValueChange={(value) => setFormData({ ...formData, ownerId: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar owner" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {owners.map((owner) => (
-                      <SelectItem key={owner.id} value={owner.id}>
-                        {owner.name} - {owner.email}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
-            {tenant && (
-              <div className="flex items-center justify-between">
-                <Label htmlFor="isActive">Estado Activo</Label>
-                <Switch
-                  id="isActive"
-                  checked={formData.isActive}
-                  onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
+                <Label htmlFor="name">
+                  Nombre <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  required
                   disabled={isLoading}
+                  placeholder="Acme Corporation"
                 />
               </div>
-            )}
+
+              <div className="grid gap-2">
+                <Label htmlFor="subdomain">Subdominio</Label>
+                <Input
+                  id="subdomain"
+                  value={formData.subdomain}
+                  onChange={(e) => setFormData({ ...formData, subdomain: e.target.value })}
+                  disabled={isLoading}
+                  placeholder="acme"
+                />
+              </div>
+
+              {!tenant && (
+                <div className="grid gap-2">
+                  <Label htmlFor="ownerId">Owner</Label>
+                  <Select
+                    value={formData.ownerId}
+                    onValueChange={(value) => setFormData({ ...formData, ownerId: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar owner" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {owners.map((owner) => (
+                        <SelectItem key={owner.id} value={owner.id}>
+                          {owner.name} - {owner.email}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {tenant && (
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="isActive">Estado Activo</Label>
+                  <Switch
+                    id="isActive"
+                    checked={formData.isActive}
+                    onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
+                    disabled={isLoading}
+                  />
+                </div>
+              )}
+            </div>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="flex-shrink-0">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
               Cancelar
             </Button>

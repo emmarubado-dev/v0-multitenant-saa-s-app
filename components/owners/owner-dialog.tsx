@@ -138,17 +138,17 @@ export function OwnerDialog({ open, onOpenChange, owner, onSuccess }: OwnerDialo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
-        <form onSubmit={handleSubmit}>
-          <DialogHeader>
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] flex flex-col">
+        <form onSubmit={handleSubmit} className="flex flex-col h-full">
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle>{owner ? "Editar Owner" : "Nuevo Owner"}</DialogTitle>
             <DialogDescription>
               {owner ? "Modifica los datos del owner" : "Crea un nuevo owner en el sistema"}
             </DialogDescription>
           </DialogHeader>
 
-          <ScrollArea className="max-h-[60vh] pr-4">
-            <div className="grid gap-4 py-4">
+          <ScrollArea className="flex-1 -mx-6 px-6 my-4" style={{ maxHeight: "calc(90vh - 180px)" }}>
+            <div className="grid gap-4 pr-4">
               {/* Personal Information */}
               <div className="space-y-4">
                 <h3 className="text-sm font-medium">Información Personal</h3>
@@ -433,7 +433,7 @@ export function OwnerDialog({ open, onOpenChange, owner, onSuccess }: OwnerDialo
             </div>
           </ScrollArea>
 
-          <DialogFooter className="mt-4">
+          <DialogFooter className="flex-shrink-0 mt-4">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
               Cancelar
             </Button>
