@@ -88,6 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email: tokenPayload.email,
         isOwner: tokenPayload.isowner?.toUpperCase() === "S",
         isActive: true,
+        ownerId:tokenPayload.ownerId
       }
 
       setUserData(userData)

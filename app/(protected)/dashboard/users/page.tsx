@@ -147,7 +147,7 @@ export default function UsersPage() {
                   users.map((user) => {
                     return (
                       <TableRow key={user.id}>
-                        <TableCell className="font-medium">{`${user.firstName} ${user.lastName}`}</TableCell>
+                        <TableCell className="font-medium">{`${user.fullName}`}</TableCell>
                         <TableCell>{user.email}</TableCell>
                         <TableCell>{user.username}</TableCell>
                         <TableCell>
@@ -198,7 +198,7 @@ export default function UsersPage() {
         onOpenChange={setIsDeleteDialogOpen}
         onConfirm={confirmDelete}
         title="¿Eliminar usuario?"
-        description={`¿Estás seguro de que deseas eliminar al usuario "${userToDelete?.name}"? Esta acción no se puede deshacer.`}
+        description={`¿Estás seguro de que deseas eliminar al usuario "${userToDelete?.fullName}"? Esta acción no se puede deshacer.`}
       />
     </div>
   )

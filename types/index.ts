@@ -16,7 +16,8 @@ export interface User {
   isOwner: boolean
   tenantId?: string
   roleId?: number
-  isActive: boolean
+  isActive: boolean,
+  ownerId:string
 }
 
 // Tenant Types
@@ -46,8 +47,7 @@ export interface UpdateTenantRequest {
 export interface UserResponse {
   id: string
   ownerId: string
-  firstName: string
-  lastName: string
+  fullName: string
   username: string
   email: string
   phoneCountryCode: string
@@ -180,7 +180,8 @@ export interface TokenPayload {
   email: string
   isowner: string
   exp?: number
-  iat?: number
+  iat?: number,
+  ownerId:string
 }
 
 // User Permissions Types
