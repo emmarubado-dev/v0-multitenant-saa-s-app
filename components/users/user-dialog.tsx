@@ -2,6 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
+import { ScrollBar } from "@/components/ui/scroll-area"
 import { userService } from "@/services/user.service"
 import { ownerService } from "@/services/owner.service"
 import type { UserResponse, OwnerResponse, CreateUserRequest, UpdateUserRequest } from "@/types"
@@ -142,17 +143,17 @@ export function UserDialog({ open, onOpenChange, user, onSuccess }: UserDialogPr
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] flex flex-col">
-        <form onSubmit={handleSubmit} className="flex flex-col h-full">
-          <DialogHeader className="flex-shrink-0">
+      <DialogContent className="sm:max-w-[700px] h-[90dvh] p-0 overflow-hidden flex flex-col">
+  <     form onSubmit={handleSubmit} className="flex flex-col h-full min-h-0">
+           <DialogHeader className="px-6 py-4 border-b flex-shrink-0">
             <DialogTitle>{user ? "Editar Usuario" : "Nuevo Usuario"}</DialogTitle>
             <DialogDescription>
               {user ? "Modifica los datos del usuario" : "Crea un nuevo usuario en el sistema"}
             </DialogDescription>
           </DialogHeader>
 
-          <ScrollArea className="flex-1 -mx-6 px-6 my-4" style={{ maxHeight: "calc(90vh - 180px)" }}>
-            <div className="grid gap-4 pr-4">
+          <div className="flex-1 overflow-y-auto px-6 py-4 overscroll-contain">
+            <div className="grid gap-4">
               {/* Owner Selection */}
               <div className="grid gap-2">
                 <Label htmlFor="ownerId">
@@ -356,9 +357,9 @@ export function UserDialog({ open, onOpenChange, user, onSuccess }: UserDialogPr
                 </div>
               </div>
             </div>
-          </ScrollArea>
+          </div>
 
-          <DialogFooter className="flex-shrink-0 mt-4">
+          <DialogFooter className="px-6 py-4 border-t flex-shrink-0">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
               Cancelar
             </Button>

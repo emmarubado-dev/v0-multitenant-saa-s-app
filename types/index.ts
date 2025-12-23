@@ -47,6 +47,8 @@ export interface UpdateTenantRequest {
 export interface UserResponse {
   id: string
   ownerId: string
+  firstName: string
+  lastName: string
   fullName: string
   username: string
   email: string
