@@ -16,45 +16,77 @@ export interface User {
   isOwner: boolean
   tenantId?: string
   roleId?: number
-  isActive: boolean,
-  ownerId:string
+  isActive: boolean
+  ownerId: string
 }
 
 // Tenant Types
 export interface TenantResponse {
-    id: string;
-    businessName: string;
-    fantasyName: string;
-    taxIdNumber: string;
-    countryId: number;
-    email: string;
-    phoneCountryCode: string;
-    phoneAreaCode: string;
-    phoneNumber: string;
-    streetName: string;
-    streetNumber: string;
-    floor: string | null;
-    apartment: string | null;
-    city: string;
-    state: string;
-    zipCode: string;
-    businessType: number;
-    domain: string;
-    ownerId: string;
-    vat: string;
+  id: string
+  businessName: string
+  fantasyName: string
+  taxIdNumber: string
+  countryId: number
+  email: string
+  phoneCountryCode: string
+  phoneAreaCode: string
+  phoneNumber: string
+  streetName: string
+  streetNumber: string
+  floor: string | null
+  apartment: string | null
+  city: string
+  state: string
+  zipCode: string
+  businessType: number
+  domain: string
+  ownerId: string
+  vat: string
 }
 
 export interface CreateTenantRequest {
-  name: string
-  subdomain?: string
-  ownerId?: string
+  businessName: string
+  fantasyName: string
+  taxIdNumber: string
+  countryId: number
+  email: string
+  phoneCountryCode: string
+  phoneAreaCode: string
+  phoneNumber: string
+  streetName: string
+  streetNumber: string
+  floor?: string
+  apartment?: string
+  city: string
+  state: string
+  zipCode: string
+  businessType: number
+  domain: string
+  ownerId: string
+  vat: string
 }
 
 export interface UpdateTenantRequest {
   id: string
-  name: string
-  subdomain?: string
-  isActive: boolean
+  businessName: string
+  fantasyName: string
+  taxIdNumber: string
+  countryId: number
+  email: string
+  phoneCountryCode: string
+  phoneAreaCode: string
+  phoneNumber: string
+  streetName: string
+  streetNumber: string
+  floor?: string
+  apartment?: string
+  city: string
+  state: string
+  zipCode: string
+  businessType: number
+  domain: string
+  ownerId: string
+  vat: string
 }
 
 // User Types
@@ -196,8 +228,8 @@ export interface TokenPayload {
   email: string
   isowner: string
   exp?: number
-  iat?: number,
-  ownerId:string
+  iat?: number
+  ownerId: string
 }
 
 // User Permissions Types

@@ -18,7 +18,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
-import { ScrollArea } from "@/components/ui/scroll-area"
 
 interface OwnerDialogProps {
   open: boolean
@@ -138,17 +137,17 @@ export function OwnerDialog({ open, onOpenChange, owner, onSuccess }: OwnerDialo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] flex flex-col">
-        <form onSubmit={handleSubmit} className="flex flex-col h-full">
-          <DialogHeader className="flex-shrink-0">
+      <DialogContent className="sm:max-w-[700px] h-[90dvh] p-0 overflow-hidden flex flex-col">
+        <form onSubmit={handleSubmit} className="flex flex-col h-full min-h-0">
+          <DialogHeader className="px-6 py-4 border-b flex-shrink-0">
             <DialogTitle>{owner ? "Editar Owner" : "Nuevo Owner"}</DialogTitle>
             <DialogDescription>
               {owner ? "Modifica los datos del owner" : "Crea un nuevo owner en el sistema"}
             </DialogDescription>
           </DialogHeader>
 
-          <ScrollArea className="flex-1 -mx-6 px-6 my-4" style={{ maxHeight: "calc(90vh - 180px)" }}>
-            <div className="grid gap-4 pr-4">
+          <div className="flex-1 overflow-y-auto px-6 py-4 overscroll-contain">
+            <div className="grid gap-4">
               {/* Personal Information */}
               <div className="space-y-4">
                 <h3 className="text-sm font-medium">Información Personal</h3>
@@ -431,9 +430,9 @@ export function OwnerDialog({ open, onOpenChange, owner, onSuccess }: OwnerDialo
                 </div>
               </div>
             </div>
-          </ScrollArea>
+          </div>
 
-          <DialogFooter className="flex-shrink-0 mt-4">
+          <DialogFooter className="px-6 py-4 border-t flex-shrink-0">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
               Cancelar
             </Button>

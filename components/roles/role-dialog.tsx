@@ -22,7 +22,6 @@ import { Switch } from "@/components/ui/switch"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useToast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
-import { ScrollArea } from "@/components/ui/scroll-area"
 
 interface RoleDialogProps {
   open: boolean
@@ -131,17 +130,17 @@ export function RoleDialog({ open, onOpenChange, role, onSuccess }: RoleDialogPr
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] flex flex-col">
-        <form onSubmit={handleSubmit} className="flex flex-col h-full">
-          <DialogHeader className="flex-shrink-0">
+      <DialogContent className="sm:max-w-[600px] h-[90dvh] p-0 overflow-hidden flex flex-col">
+        <form onSubmit={handleSubmit} className="flex flex-col h-full min-h-0">
+          <DialogHeader className="px-6 py-4 border-b flex-shrink-0">
             <DialogTitle>{role ? "Editar Rol" : "Nuevo Rol"}</DialogTitle>
             <DialogDescription>
               {role ? "Modifica los datos del rol" : "Crea un nuevo rol en el sistema"}
             </DialogDescription>
           </DialogHeader>
 
-          <ScrollArea className="flex-1 -mx-6 px-6 my-4" style={{ maxHeight: "calc(90vh - 180px)" }}>
-            <div className="grid gap-4 pr-4">
+          <div className="flex-1 overflow-y-auto px-6 py-4 overscroll-contain">
+            <div className="grid gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="name">
                   Nombre <span className="text-destructive">*</span>
@@ -209,9 +208,9 @@ export function RoleDialog({ open, onOpenChange, role, onSuccess }: RoleDialogPr
                 </div>
               )}
             </div>
-          </ScrollArea>
+          </div>
 
-          <DialogFooter className="flex-shrink-0 mt-4">
+          <DialogFooter className="px-6 py-4 border-t flex-shrink-0">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
               Cancelar
             </Button>
