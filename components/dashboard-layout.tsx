@@ -161,7 +161,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" className="gap-2 bg-transparent">
                       <Building2 className="h-4 w-4" />
-                      <span className="hidden sm:inline">{selectedTenant?.name || "Seleccionar Tenant"}</span>
+                      <span className="hidden sm:inline">{selectedTenant?.businessName || "Seleccionar Tenant"}</span>
                       <ChevronDown className="h-4 w-4 opacity-50" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -176,9 +176,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                       >
                         <Building2 className="mr-2 h-4 w-4" />
                         <div className="flex flex-col">
-                          <span className="font-medium">{tenant.name}</span>
-                          {tenant.subdomain && (
-                            <span className="text-xs text-muted-foreground">{tenant.subdomain}</span>
+                          <span className="font-medium">{tenant.businessName}</span>
+                          {tenant.domain && (
+                            <span className="text-xs text-muted-foreground">{tenant.domain}</span>
                           )}
                         </div>
                       </DropdownMenuItem>
