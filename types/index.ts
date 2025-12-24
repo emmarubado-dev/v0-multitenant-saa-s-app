@@ -41,7 +41,7 @@ export interface TenantResponse {
   businessType: number
   domain: string
   ownerId: string
-  vat: string,
+  vat: string
   createdAt: Date
 }
 
@@ -94,8 +94,6 @@ export interface UpdateTenantRequest {
 export interface UserResponse {
   id: string
   ownerId: string
-  firstName: string
-  lastName: string
   fullName: string
   username: string
   email: string
@@ -105,9 +103,6 @@ export interface UserResponse {
   isAdmin: boolean
   enabled: boolean
   createdAt: string
-  tenantId?: string
-  roleId?: number
-  isActive: boolean
 }
 
 export interface CreateUserRequest {
@@ -126,6 +121,37 @@ export interface CreateUserRequest {
 
 export interface UpdateUserRequest extends CreateUserRequest {
   id: string
+}
+
+// User Roles types for role assignment
+export interface UserRoleTenantDto {
+  id: string
+  userId: string
+  userName: string
+  roleId: string
+  roleName: string
+  tenantId: string
+  tenantName: string
+  createdAt: string
+  createdBy: string
+}
+
+export interface AssignUserRoleRequest {
+  userId: string
+  roleId: string
+  tenantId: string
+}
+
+export interface UserRolesInTenantDto {
+  userId: string
+  userName: string
+  tenantId: string
+  roles: RoleBasicDto[]
+}
+
+export interface RoleBasicDto {
+  id: string
+  name: string
 }
 
 // Role Types

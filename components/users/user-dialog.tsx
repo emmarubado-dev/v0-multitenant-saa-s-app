@@ -2,11 +2,12 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { ScrollBar } from "@/components/ui/scroll-area"
 import { userService } from "@/services/user.service"
-import { ownerService } from "@/services/owner.service"
-import type { UserResponse, OwnerResponse, CreateUserRequest, UpdateUserRequest } from "@/types"
+import { roleService } from "@/services/role.service"
+import { userRoleService } from "@/services/user-role.service"
+import type { UserResponse, CreateUserRequest, UpdateUserRequest, RoleResponse } from "@/types"
 import { getErrorMessage, getFieldErrors } from "@/lib/error-handler"
+import { useAuth } from "@/contexts/auth-context"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -19,10 +20,9 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
-import { Loader2 } from "lucide-react"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { Loader2, X } from "lucide-react"
 
 interface UserDialogProps {
   open: boolean
@@ -33,7 +33,8 @@ interface UserDialogProps {
 
 export function UserDialog({ open, onOpenChange, user, onSuccess }: UserDialogProps) {
   const [isLoading, setIsLoading] = useState(false)
-  const [owners, setOwners] = useState<OwnerResponse[]>([])
+  const [roles, setRoles] = useState<RoleResponse[]>([])
+  const [selectedRoles, setSelectedRoles] = useState<string[]>([])
   const [formData, setFormData] = useState<CreateUserRequest>({
     ownerId: "",
     firstName: "",
@@ -49,19 +50,22 @@ export function UserDialog({ open, onOpenChange, user, onSuccess }: UserDialogPr
   })
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({})
   const { toast } = useToast()
+  const { user: currentUser, selectedTenantId } = useAuth()
 
   useEffect(() => {
     if (open) {
-      loadOwners()
+      loadRoles()
     }
   }, [open])
 
   useEffect(() => {
-    if (user) {
+    if (user && selectedTenantId) {
+      loadUserRoles(user.id, selectedTenantId)
+
       setFormData({
         ownerId: user.ownerId,
-        firstName: user.firstName,
-        lastName: user.lastName,
+        firstName: "",
+        lastName: "",
         username: user.username,
         email: user.email,
         password: "",
@@ -73,7 +77,7 @@ export function UserDialog({ open, onOpenChange, user, onSuccess }: UserDialogPr
       })
     } else {
       setFormData({
-        ownerId: "",
+        ownerId: currentUser?.ownerId || "",
         firstName: "",
         lastName: "",
         username: "",
@@ -85,42 +89,84 @@ export function UserDialog({ open, onOpenChange, user, onSuccess }: UserDialogPr
         isAdmin: false,
         enabled: true,
       })
+      setSelectedRoles([])
     }
     setFieldErrors({})
-  }, [user, open])
+  }, [user, open, currentUser, selectedTenantId])
 
-  const loadOwners = async () => {
+  const loadRoles = async () => {
     try {
-      const data = await ownerService.getAll()
-      setOwners(data)
+      const data = await roleService.getAll()
+      setRoles(data)
     } catch (error) {
-      console.error("[v0] Error loading owners:", error)
+      console.error("[v0] Error loading roles:", error)
     }
+  }
+
+  const loadUserRoles = async (userId: string, tenantId: string) => {
+    try {
+      const data = await userRoleService.getUserRoles(userId, tenantId)
+      setSelectedRoles(data.roles.map((r) => r.id))
+    } catch (error) {
+      console.error("[v0] Error loading user roles:", error)
+      setSelectedRoles([])
+    }
+  }
+
+  const toggleRole = (roleId: string) => {
+    setSelectedRoles((prev) => (prev.includes(roleId) ? prev.filter((id) => id !== roleId) : [...prev, roleId]))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (!selectedTenantId) {
+      toast({
+        title: "Error",
+        description: "Debe seleccionar un tenant",
+        variant: "destructive",
+      })
+      return
+    }
+
     setIsLoading(true)
     setFieldErrors({})
 
     try {
+      let userId: string
+
       if (user) {
         const updateData: UpdateUserRequest = {
           ...formData,
           id: user.id,
         }
         await userService.update(updateData)
+        userId = user.id
         toast({
           title: "Éxito",
           description: "Usuario actualizado correctamente",
         })
       } else {
-        await userService.create(formData)
+        const created = await userService.create(formData)
+        userId = created.id
         toast({
           title: "Éxito",
           description: "Usuario creado correctamente",
         })
       }
+
+      if (selectedRoles.length > 0) {
+        await Promise.all(
+          selectedRoles.map((roleId) =>
+            userRoleService.assignRole({
+              userId,
+              roleId,
+              tenantId: selectedTenantId,
+            }),
+          ),
+        )
+      }
+
       onSuccess()
       onOpenChange(false)
     } catch (error) {
@@ -144,8 +190,8 @@ export function UserDialog({ open, onOpenChange, user, onSuccess }: UserDialogPr
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[700px] h-[90dvh] p-0 overflow-hidden flex flex-col">
-  <     form onSubmit={handleSubmit} className="flex flex-col h-full min-h-0">
-           <DialogHeader className="px-6 py-4 border-b flex-shrink-0">
+        <form onSubmit={handleSubmit} className="flex flex-col h-full min-h-0">
+          <DialogHeader className="px-6 py-4 border-b flex-shrink-0">
             <DialogTitle>{user ? "Editar Usuario" : "Nuevo Usuario"}</DialogTitle>
             <DialogDescription>
               {user ? "Modifica los datos del usuario" : "Crea un nuevo usuario en el sistema"}
@@ -154,29 +200,6 @@ export function UserDialog({ open, onOpenChange, user, onSuccess }: UserDialogPr
 
           <div className="flex-1 overflow-y-auto px-6 py-4 overscroll-contain">
             <div className="grid gap-4">
-              {/* Owner Selection */}
-              <div className="grid gap-2">
-                <Label htmlFor="ownerId">
-                  Owner <span className="text-destructive">*</span>
-                </Label>
-                <Select
-                  value={formData.ownerId}
-                  onValueChange={(value) => setFormData({ ...formData, ownerId: value })}
-                >
-                  <SelectTrigger className={getFieldError("OwnerId") ? "border-destructive" : ""}>
-                    <SelectValue placeholder="Seleccionar owner" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {owners.map((owner) => (
-                      <SelectItem key={owner.id} value={owner.id}>
-                        {owner.firstName} {owner.lastName} - {owner.email}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {getFieldError("OwnerId") && <p className="text-xs text-destructive">{getFieldError("OwnerId")}</p>}
-              </div>
-
               {/* Personal Information */}
               <div className="space-y-4">
                 <h3 className="text-sm font-medium">Información Personal</h3>
@@ -331,6 +354,26 @@ export function UserDialog({ open, onOpenChange, user, onSuccess }: UserDialogPr
                     )}
                   </div>
                 </div>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium">Roles en Tenant Seleccionado</h3>
+                <div className="flex flex-wrap gap-2">
+                  {roles.map((role) => (
+                    <Badge
+                      key={role.id}
+                      variant={selectedRoles.includes(role.id.toString()) ? "default" : "outline"}
+                      className="cursor-pointer"
+                      onClick={() => toggleRole(role.id.toString())}
+                    >
+                      {role.name}
+                      {selectedRoles.includes(role.id.toString()) && <X className="ml-1 h-3 w-3" />}
+                    </Badge>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Selecciona los roles que tendrá el usuario en el tenant actual
+                </p>
               </div>
 
               {/* Permissions */}

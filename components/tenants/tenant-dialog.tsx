@@ -3,9 +3,9 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import { tenantService } from "@/services/tenant.service"
-import { ownerService } from "@/services/owner.service"
-import type { TenantResponse, OwnerResponse, CreateTenantRequest, UpdateTenantRequest } from "@/types"
+import type { TenantResponse, CreateTenantRequest, UpdateTenantRequest } from "@/types"
 import { getErrorMessage, getFieldErrors } from "@/lib/error-handler"
+import { useAuth } from "@/contexts/auth-context"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -17,7 +17,6 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
 
@@ -30,7 +29,6 @@ interface TenantDialogProps {
 
 export function TenantDialog({ open, onOpenChange, tenant, onSuccess }: TenantDialogProps) {
   const [isLoading, setIsLoading] = useState(false)
-  const [owners, setOwners] = useState<OwnerResponse[]>([])
   const [formData, setFormData] = useState<CreateTenantRequest>({
     businessName: "",
     fantasyName: "",
@@ -54,12 +52,7 @@ export function TenantDialog({ open, onOpenChange, tenant, onSuccess }: TenantDi
   })
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({})
   const { toast } = useToast()
-
-  useEffect(() => {
-    if (open) {
-      loadOwners()
-    }
-  }, [open])
+  const { user } = useAuth()
 
   useEffect(() => {
     if (tenant) {
@@ -103,21 +96,12 @@ export function TenantDialog({ open, onOpenChange, tenant, onSuccess }: TenantDi
         zipCode: "",
         businessType: 0,
         domain: "",
-        ownerId: "",
+        ownerId: user?.ownerId || "",
         vat: "",
       })
     }
     setFieldErrors({})
-  }, [tenant, open])
-
-  const loadOwners = async () => {
-    try {
-      const data = await ownerService.getAll()
-      setOwners(data)
-    } catch (error) {
-      console.error("[v0] Error loading owners:", error)
-    }
-  }
+  }, [tenant, open, user])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -175,29 +159,6 @@ export function TenantDialog({ open, onOpenChange, tenant, onSuccess }: TenantDi
 
           <div className="flex-1 overflow-y-auto px-6 py-4 overscroll-contain">
             <div className="grid gap-4">
-              {/* Owner Selection */}
-              <div className="grid gap-2">
-                <Label htmlFor="ownerId">
-                  Owner <span className="text-destructive">*</span>
-                </Label>
-                <Select
-                  value={formData.ownerId}
-                  onValueChange={(value) => setFormData({ ...formData, ownerId: value })}
-                >
-                  <SelectTrigger className={getFieldError("OwnerId") ? "border-destructive" : ""}>
-                    <SelectValue placeholder="Seleccionar owner" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {owners.map((owner) => (
-                      <SelectItem key={owner.id} value={owner.id}>
-                        {owner.firstName} {owner.lastName} - {owner.email}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {getFieldError("OwnerId") && <p className="text-xs text-destructive">{getFieldError("OwnerId")}</p>}
-              </div>
-
               {/* Business Information */}
               <div className="space-y-4">
                 <h3 className="text-sm font-medium">Información del Negocio</h3>
@@ -277,7 +238,7 @@ export function TenantDialog({ open, onOpenChange, tenant, onSuccess }: TenantDi
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2">
                     <Label htmlFor="countryId">
-                      País <span className="text-destructive">*</span>
+                      País ID <span className="text-destructive">*</span>
                     </Label>
                     <Input
                       id="countryId"
@@ -506,14 +467,14 @@ export function TenantDialog({ open, onOpenChange, tenant, onSuccess }: TenantDi
 
                   <div className="grid gap-2">
                     <Label htmlFor="zipCode">
-                      CP <span className="text-destructive">*</span>
+                      Código Postal <span className="text-destructive">*</span>
                     </Label>
                     <Input
                       id="zipCode"
                       value={formData.zipCode}
                       onChange={(e) => setFormData({ ...formData, zipCode: e.target.value })}
                       disabled={isLoading}
-                      placeholder="1000"
+                      placeholder="C1000"
                       maxLength={20}
                       className={getFieldError("ZipCode") ? "border-destructive" : ""}
                     />
