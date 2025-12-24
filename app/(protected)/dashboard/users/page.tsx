@@ -130,8 +130,6 @@ export default function UsersPage() {
                   <TableHead className="min-w-[150px]">Nombre</TableHead>
                   <TableHead className="min-w-[200px]">Email</TableHead>
                   <TableHead className="min-w-[120px]">Username</TableHead>
-                  <TableHead className="min-w-[100px]">Admin</TableHead>
-                  <TableHead className="min-w-[100px]">Estado</TableHead>
                   <TableHead className="min-w-[120px]">Fecha Creación</TableHead>
                   <TableHead className="text-right min-w-[100px]">Acciones</TableHead>
                 </TableRow>
@@ -150,14 +148,6 @@ export default function UsersPage() {
                         <TableCell className="font-medium">{`${user.fullName}`}</TableCell>
                         <TableCell>{user.email}</TableCell>
                         <TableCell>{user.username}</TableCell>
-                        <TableCell>
-                          <Badge variant={user.isAdmin ? "default" : "outline"}>{user.isAdmin ? "Sí" : "No"}</Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={user.enabled ? "default" : "secondary"}>
-                            {user.enabled ? "Activo" : "Inactivo"}
-                          </Badge>
-                        </TableCell>
                         <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">

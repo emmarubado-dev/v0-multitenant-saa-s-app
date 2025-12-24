@@ -122,8 +122,6 @@ export default function TenantsPage() {
                 <TableRow>
                   <TableHead className="min-w-[200px]">Nombre</TableHead>
                   <TableHead className="min-w-[150px]">Subdominio</TableHead>
-                  <TableHead className="min-w-[200px]">Owner</TableHead>
-                  <TableHead className="min-w-[100px]">Estado</TableHead>
                   <TableHead className="min-w-[120px]">Fecha Creación</TableHead>
                   <TableHead className="text-right min-w-[100px]">Acciones</TableHead>
                 </TableRow>
@@ -140,14 +138,8 @@ export default function TenantsPage() {
                     const owner = owners.find((o) => o.id === tenant.ownerId)
                     return (
                       <TableRow key={tenant.id}>
-                        <TableCell className="font-medium">{tenant.name}</TableCell>
-                        <TableCell>{tenant.subdomain || "-"}</TableCell>
-                        <TableCell>{owner ? `${owner.firstName} ${owner.lastName}` : "-"}</TableCell>
-                        <TableCell>
-                          <Badge variant={tenant.isActive ? "default" : "secondary"}>
-                            {tenant.isActive ? "Activo" : "Inactivo"}
-                          </Badge>
-                        </TableCell>
+                        <TableCell className="font-medium">{tenant.businessName}</TableCell>
+                        <TableCell>{tenant.domain || "-"}</TableCell>
                         <TableCell>{new Date(tenant.createdAt).toLocaleDateString()}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
@@ -187,7 +179,7 @@ export default function TenantsPage() {
         onOpenChange={setIsDeleteDialogOpen}
         onConfirm={confirmDelete}
         title="¿Eliminar tenant?"
-        description={`¿Estás seguro de que deseas eliminar el tenant "${tenantToDelete?.name}"? Esta acción no se puede deshacer.`}
+        description={`¿Estás seguro de que deseas eliminar el tenant "${tenantToDelete?.businessName}"? Esta acción no se puede deshacer.`}
       />
     </div>
   )

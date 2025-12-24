@@ -41,7 +41,8 @@ export interface TenantResponse {
   businessType: number
   domain: string
   ownerId: string
-  vat: string
+  vat: string,
+  createdAt: Date
 }
 
 export interface CreateTenantRequest {
