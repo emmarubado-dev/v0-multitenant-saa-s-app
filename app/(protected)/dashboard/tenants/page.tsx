@@ -3,12 +3,12 @@
 import { useState, useEffect } from "react"
 import { tenantService } from "@/services/tenant.service"
 import { ownerService } from "@/services/owner.service"
+import { useAuth } from "@/contexts/auth-context"
 import type { TenantResponse, OwnerResponse } from "@/types"
 import { Button } from "@/components/ui/button"
 import { Plus, Pencil, Trash2, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
 import { TenantDialog } from "@/components/tenants/tenant-dialog"
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -22,6 +22,7 @@ export default function TenantsPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [tenantToDelete, setTenantToDelete] = useState<TenantResponse | null>(null)
   const { toast } = useToast()
+  const { selectedTenantId } = useAuth()
 
   const loadData = async () => {
     try {
@@ -41,8 +42,11 @@ export default function TenantsPage() {
   }
 
   useEffect(() => {
-    loadData()
-  }, [])
+    if (selectedTenantId) {
+      console.log("[v0] Tenant changed, reloading tenants for tenant:", selectedTenantId)
+      loadData()
+    }
+  }, [selectedTenantId])
 
   const handleCreate = () => {
     setSelectedTenant(null)

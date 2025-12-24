@@ -24,10 +24,9 @@ apiClient.interceptors.request.use(
       console.log("[v0] Token added to request")
     }
 
-    // Agregar TenantId al header si está disponible
     if (tenantId && config.headers) {
-      config.headers["X-Tenant-Id"] = tenantId
-      console.log("[v0] Tenant-Id added to request:", tenantId)
+      config.headers["X-Tenant"] = tenantId
+      console.log("[v0] X-Tenant header added to request:", tenantId)
     }
 
     return config

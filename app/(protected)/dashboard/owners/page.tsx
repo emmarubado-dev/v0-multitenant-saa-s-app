@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { ownerService } from "@/services/owner.service"
+import { useAuth } from "@/contexts/auth-context"
 import type { OwnerResponse } from "@/types"
 import { Button } from "@/components/ui/button"
 import { Plus, Pencil, Trash2, Loader2 } from "lucide-react"
@@ -20,6 +21,7 @@ export default function OwnersPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [ownerToDelete, setOwnerToDelete] = useState<OwnerResponse | null>(null)
   const { toast } = useToast()
+  const { selectedTenantId } = useAuth()
 
   const loadData = async () => {
     try {
@@ -38,8 +40,11 @@ export default function OwnersPage() {
   }
 
   useEffect(() => {
-    loadData()
-  }, [])
+    if (selectedTenantId) {
+      console.log("[v0] Tenant changed, reloading owners for tenant:", selectedTenantId)
+      loadData()
+    }
+  }, [selectedTenantId])
 
   const handleCreate = () => {
     setSelectedOwner(null)

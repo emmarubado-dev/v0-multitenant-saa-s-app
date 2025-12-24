@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from "react"
 import { roleService } from "@/services/role.service"
+import { useAuth } from "@/contexts/auth-context"
 import type { RoleResponse } from "@/types"
 import { Button } from "@/components/ui/button"
 import { Plus, Pencil, Trash2, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
 import { RoleDialog } from "@/components/roles/role-dialog"
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -20,6 +20,7 @@ export default function RolesPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [roleToDelete, setRoleToDelete] = useState<RoleResponse | null>(null)
   const { toast } = useToast()
+  const { selectedTenantId } = useAuth()
 
   const loadData = async () => {
     try {
@@ -38,8 +39,11 @@ export default function RolesPage() {
   }
 
   useEffect(() => {
-    loadData()
-  }, [])
+    if (selectedTenantId) {
+      console.log("[v0] Tenant changed, reloading roles for tenant:", selectedTenantId)
+      loadData()
+    }
+  }, [selectedTenantId])
 
   const handleCreate = () => {
     setSelectedRole(null)
