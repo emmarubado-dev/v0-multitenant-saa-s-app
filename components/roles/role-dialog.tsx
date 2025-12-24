@@ -89,7 +89,6 @@ export function RoleDialog({ open, onOpenChange, role, onSuccess }: RoleDialogPr
         const updateData: UpdateRoleRequest = {
           id: role.id,
           name: formData.name,
-          description: formData.description || undefined,
           isActive: formData.isActive,
         }
         await roleService.update(updateData)
@@ -156,21 +155,7 @@ export function RoleDialog({ open, onOpenChange, role, onSuccess }: RoleDialogPr
                 {getFieldError("Name") && <p className="text-xs text-destructive">{getFieldError("Name")}</p>}
               </div>
 
-              <div className="grid gap-2">
-                <Label htmlFor="description">Descripción</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  disabled={isLoading}
-                  placeholder="Descripción del rol y sus permisos..."
-                  rows={3}
-                  className={getFieldError("Description") ? "border-destructive" : ""}
-                />
-                {getFieldError("Description") && (
-                  <p className="text-xs text-destructive">{getFieldError("Description")}</p>
-                )}
-              </div>
+              
 
               {!role && actions.length > 0 && (
                 <div className="grid gap-2">
@@ -196,17 +181,6 @@ export function RoleDialog({ open, onOpenChange, role, onSuccess }: RoleDialogPr
                 </div>
               )}
 
-              {role && (
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="isActive">Estado Activo</Label>
-                  <Switch
-                    id="isActive"
-                    checked={formData.isActive}
-                    onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
-                    disabled={isLoading}
-                  />
-                </div>
-              )}
             </div>
           </div>
 

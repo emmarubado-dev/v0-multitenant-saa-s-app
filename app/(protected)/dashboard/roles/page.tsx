@@ -119,8 +119,6 @@ export default function RolesPage() {
                 <TableRow>
                   <TableHead className="min-w-[80px]">ID</TableHead>
                   <TableHead className="min-w-[150px]">Nombre</TableHead>
-                  <TableHead className="min-w-[300px]">Descripción</TableHead>
-                  <TableHead className="min-w-[100px]">Estado</TableHead>
                   <TableHead className="min-w-[120px]">Fecha Creación</TableHead>
                   <TableHead className="text-right min-w-[100px]">Acciones</TableHead>
                 </TableRow>
@@ -137,12 +135,6 @@ export default function RolesPage() {
                     <TableRow key={role.id}>
                       <TableCell className="font-mono text-muted-foreground">{role.id}</TableCell>
                       <TableCell className="font-medium">{role.name}</TableCell>
-                      <TableCell className="max-w-md truncate">{role.description || "-"}</TableCell>
-                      <TableCell>
-                        <Badge variant={role.isActive ? "default" : "secondary"}>
-                          {role.isActive ? "Activo" : "Inactivo"}
-                        </Badge>
-                      </TableCell>
                       <TableCell>{new Date(role.createdAt).toLocaleDateString()}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
