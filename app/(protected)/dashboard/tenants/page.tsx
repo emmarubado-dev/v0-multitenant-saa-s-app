@@ -8,10 +8,10 @@ import type { TenantResponse, OwnerResponse } from "@/types"
 import { Button } from "@/components/ui/button"
 import { Plus, Pencil, Trash2, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { TenantDialog } from "@/components/tenants/tenant-dialog"
-import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { DataTable, type ColumnDef } from "@/components/data-table"
+import TenantDialog from "@/components/tenant-dialog" // Import TenantDialog
+import DeleteConfirmDialog from "@/components/delete-confirm-dialog" // Import DeleteConfirmDialog
 
 export default function TenantsPage() {
   const [tenants, setTenants] = useState<TenantResponse[]>([])
@@ -91,6 +91,59 @@ export default function TenantsPage() {
     loadData()
   }
 
+  const columns: ColumnDef<TenantResponse>[] = [
+    {
+      key: "businessName",
+      header: "Nombre",
+      cell: (tenant) => <span className="font-medium">{tenant.businessName}</span>,
+      accessor: (tenant) => tenant.businessName,
+      minWidth: "min-w-[200px]",
+    },
+    {
+      key: "domain",
+      header: "Dominio",
+      cell: (tenant) => tenant.domain || "-",
+      accessor: (tenant) => tenant.domain || "",
+      minWidth: "min-w-[150px]",
+    },
+    {
+      key: "email",
+      header: "Email",
+      cell: (tenant) => tenant.email,
+      accessor: (tenant) => tenant.email,
+      minWidth: "min-w-[200px]",
+    },
+    {
+      key: "createdAt",
+      header: "Fecha Creación",
+      cell: (tenant) => new Date(tenant.createdAt).toLocaleDateString(),
+      accessor: (tenant) => new Date(tenant.createdAt).toISOString(),
+      minWidth: "min-w-[120px]",
+    },
+    {
+      key: "actions",
+      header: "Acciones",
+      cell: (tenant) => (
+        <div className="flex justify-end gap-2">
+          <Button variant="ghost" size="icon" onClick={() => handleEdit(tenant)}>
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handleDelete(tenant)}
+            className="text-destructive hover:text-destructive"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      ),
+      sortable: false,
+      filterable: false,
+      minWidth: "min-w-[100px] text-right",
+    },
+  ]
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -120,53 +173,7 @@ export default function TenantsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="rounded-md border overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="min-w-[200px]">Nombre</TableHead>
-                  <TableHead className="min-w-[150px]">Subdominio</TableHead>
-                  <TableHead className="min-w-[120px]">Fecha Creación</TableHead>
-                  <TableHead className="text-right min-w-[100px]">Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {tenants.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground">
-                      No hay tenants registrados
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  tenants.map((tenant) => {
-                    const owner = owners.find((o) => o.id === tenant.ownerId)
-                    return (
-                      <TableRow key={tenant.id}>
-                        <TableCell className="font-medium">{tenant.businessName}</TableCell>
-                        <TableCell>{tenant.domain || "-"}</TableCell>
-                        <TableCell>{new Date(tenant.createdAt).toLocaleDateString()}</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button variant="ghost" size="icon" onClick={() => handleEdit(tenant)}>
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleDelete(tenant)}
-                              className="text-destructive hover:text-destructive"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })
-                )}
-              </TableBody>
-            </Table>
-          </div>
+          <DataTable data={tenants} columns={columns} emptyMessage="No hay tenants registrados" />
         </CardContent>
       </Card>
 

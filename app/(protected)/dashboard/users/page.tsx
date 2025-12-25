@@ -9,10 +9,10 @@ import type { UserResponse, TenantResponse, RoleResponse } from "@/types"
 import { Button } from "@/components/ui/button"
 import { Plus, Pencil, Trash2, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { UserDialog } from "@/components/users/user-dialog"
-import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
+import { DataTable, type ColumnDef } from "@/components/data-table"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import UserDialog from "@/components/user-dialog"
+import DeleteConfirmDialog from "@/components/delete-confirm-dialog"
 
 export default function UsersPage() {
   const [users, setUsers] = useState<UserResponse[]>([])
@@ -98,6 +98,59 @@ export default function UsersPage() {
     loadData()
   }
 
+  const columns: ColumnDef<UserResponse>[] = [
+    {
+      key: "fullName",
+      header: "Nombre",
+      cell: (user) => <span className="font-medium">{user.fullName}</span>,
+      accessor: (user) => user.fullName,
+      minWidth: "min-w-[150px]",
+    },
+    {
+      key: "email",
+      header: "Email",
+      cell: (user) => user.email,
+      accessor: (user) => user.email,
+      minWidth: "min-w-[200px]",
+    },
+    {
+      key: "username",
+      header: "Username",
+      cell: (user) => user.username,
+      accessor: (user) => user.username,
+      minWidth: "min-w-[120px]",
+    },
+    {
+      key: "createdAt",
+      header: "Fecha Creación",
+      cell: (user) => new Date(user.createdAt).toLocaleDateString(),
+      accessor: (user) => new Date(user.createdAt).toISOString(),
+      minWidth: "min-w-[120px]",
+    },
+    {
+      key: "actions",
+      header: "Acciones",
+      cell: (user) => (
+        <div className="flex justify-end gap-2">
+          <Button variant="ghost" size="icon" onClick={() => handleEdit(user)}>
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handleDelete(user)}
+            className="text-destructive hover:text-destructive"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      ),
+      sortable: false,
+      filterable: false,
+      minWidth: "min-w-[100px] text-right",
+    },
+  ]
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -127,54 +180,7 @@ export default function UsersPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="rounded-md border overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="min-w-[150px]">Nombre</TableHead>
-                  <TableHead className="min-w-[200px]">Email</TableHead>
-                  <TableHead className="min-w-[120px]">Username</TableHead>
-                  <TableHead className="min-w-[120px]">Fecha Creación</TableHead>
-                  <TableHead className="text-right min-w-[100px]">Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {users.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center text-muted-foreground">
-                      No hay usuarios registrados
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  users.map((user) => {
-                    return (
-                      <TableRow key={user.id}>
-                        <TableCell className="font-medium">{`${user.fullName}`}</TableCell>
-                        <TableCell>{user.email}</TableCell>
-                        <TableCell>{user.username}</TableCell>
-                        <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button variant="ghost" size="icon" onClick={() => handleEdit(user)}>
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleDelete(user)}
-                              className="text-destructive hover:text-destructive"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })
-                )}
-              </TableBody>
-            </Table>
-          </div>
+          <DataTable data={users} columns={columns} emptyMessage="No hay usuarios registrados" />
         </CardContent>
       </Card>
 

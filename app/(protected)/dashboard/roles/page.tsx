@@ -7,7 +7,7 @@ import type { RoleResponse } from "@/types"
 import { Button } from "@/components/ui/button"
 import { Plus, Pencil, Trash2, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { DataTable, type ColumnDef } from "@/components/data-table"
 import { RoleDialog } from "@/components/roles/role-dialog"
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -88,6 +88,52 @@ export default function RolesPage() {
     loadData()
   }
 
+  const columns: ColumnDef<RoleResponse>[] = [
+    {
+      key: "id",
+      header: "ID",
+      cell: (role) => <span className="font-mono text-muted-foreground">{role.id}</span>,
+      accessor: (role) => String(role.id),
+      minWidth: "min-w-[80px]",
+    },
+    {
+      key: "name",
+      header: "Nombre",
+      cell: (role) => <span className="font-medium">{role.name}</span>,
+      accessor: (role) => role.name,
+      minWidth: "min-w-[150px]",
+    },
+    {
+      key: "createdAt",
+      header: "Fecha Creación",
+      cell: (role) => new Date(role.createdAt).toLocaleDateString(),
+      accessor: (role) => new Date(role.createdAt).toISOString(),
+      minWidth: "min-w-[120px]",
+    },
+    {
+      key: "actions",
+      header: "Acciones",
+      cell: (role) => (
+        <div className="flex justify-end gap-2">
+          <Button variant="ghost" size="icon" onClick={() => handleEdit(role)}>
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handleDelete(role)}
+            className="text-destructive hover:text-destructive"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      ),
+      sortable: false,
+      filterable: false,
+      minWidth: "min-w-[100px] text-right",
+    },
+  ]
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -117,50 +163,7 @@ export default function RolesPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="rounded-md border overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="min-w-[80px]">ID</TableHead>
-                  <TableHead className="min-w-[150px]">Nombre</TableHead>
-                  <TableHead className="min-w-[120px]">Fecha Creación</TableHead>
-                  <TableHead className="text-right min-w-[100px]">Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {roles.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground">
-                      No hay roles configurados
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  roles.map((role) => (
-                    <TableRow key={role.id}>
-                      <TableCell className="font-mono text-muted-foreground">{role.id}</TableCell>
-                      <TableCell className="font-medium">{role.name}</TableCell>
-                      <TableCell>{new Date(role.createdAt).toLocaleDateString()}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button variant="ghost" size="icon" onClick={() => handleEdit(role)}>
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDelete(role)}
-                            className="text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
+          <DataTable data={roles} columns={columns} emptyMessage="No hay roles configurados" />
         </CardContent>
       </Card>
 

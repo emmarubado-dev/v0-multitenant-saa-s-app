@@ -7,7 +7,7 @@ import type { OwnerResponse } from "@/types"
 import { Button } from "@/components/ui/button"
 import { Plus, Pencil, Trash2, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { DataTable, type ColumnDef } from "@/components/data-table"
 import { Badge } from "@/components/ui/badge"
 import { OwnerDialog } from "@/components/owners/owner-dialog"
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
@@ -89,6 +89,68 @@ export default function OwnersPage() {
     loadData()
   }
 
+  const columns: ColumnDef<OwnerResponse>[] = [
+    {
+      key: "name",
+      header: "Nombre",
+      cell: (owner) => <span className="font-medium">{`${owner.firstName} ${owner.lastName}`}</span>,
+      accessor: (owner) => `${owner.firstName} ${owner.lastName}`,
+      minWidth: "min-w-[200px]",
+    },
+    {
+      key: "email",
+      header: "Email",
+      cell: (owner) => owner.email,
+      accessor: (owner) => owner.email,
+      minWidth: "min-w-[200px]",
+    },
+    {
+      key: "tenantsCount",
+      header: "Tenants",
+      cell: (owner) => <Badge variant="outline">{owner.tenantsCount || 0}</Badge>,
+      accessor: (owner) => String(owner.tenantsCount || 0),
+      minWidth: "min-w-[100px]",
+    },
+    {
+      key: "isActive",
+      header: "Estado",
+      cell: (owner) => (
+        <Badge variant={owner.isActive ? "default" : "secondary"}>{owner.isActive ? "Activo" : "Inactivo"}</Badge>
+      ),
+      accessor: (owner) => (owner.isActive ? "Activo" : "Inactivo"),
+      minWidth: "min-w-[100px]",
+    },
+    {
+      key: "createdAt",
+      header: "Fecha Creación",
+      cell: (owner) => new Date(owner.createdAt).toLocaleDateString(),
+      accessor: (owner) => new Date(owner.createdAt).toISOString(),
+      minWidth: "min-w-[120px]",
+    },
+    {
+      key: "actions",
+      header: "Acciones",
+      cell: (owner) => (
+        <div className="flex justify-end gap-2">
+          <Button variant="ghost" size="icon" onClick={() => handleEdit(owner)}>
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handleDelete(owner)}
+            className="text-destructive hover:text-destructive"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      ),
+      sortable: false,
+      filterable: false,
+      minWidth: "min-w-[100px] text-right",
+    },
+  ]
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -118,60 +180,7 @@ export default function OwnersPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="rounded-md border overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="min-w-[200px]">Nombre</TableHead>
-                  <TableHead className="min-w-[200px]">Email</TableHead>
-                  <TableHead className="min-w-[100px]">Tenants</TableHead>
-                  <TableHead className="min-w-[100px]">Estado</TableHead>
-                  <TableHead className="min-w-[120px]">Fecha Creación</TableHead>
-                  <TableHead className="text-right min-w-[100px]">Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {owners.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground">
-                      No hay owners registrados
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  owners.map((owner) => (
-                    <TableRow key={owner.id}>
-                      <TableCell className="font-medium">{`${owner.firstName} ${owner.lastName}`}</TableCell>
-                      <TableCell>{owner.email}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{owner.tenantsCount || 0}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={owner.isActive ? "default" : "secondary"}>
-                          {owner.isActive ? "Activo" : "Inactivo"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{new Date(owner.createdAt).toLocaleDateString()}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button variant="ghost" size="icon" onClick={() => handleEdit(owner)}>
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDelete(owner)}
-                            className="text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
+          <DataTable data={owners} columns={columns} emptyMessage="No hay owners registrados" />
         </CardContent>
       </Card>
 
