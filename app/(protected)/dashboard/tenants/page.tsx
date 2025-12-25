@@ -10,8 +10,8 @@ import { Plus, Pencil, Trash2, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { DataTable, type ColumnDef } from "@/components/data-table"
-import TenantDialog from "@/components/tenant-dialog" // Import TenantDialog
-import DeleteConfirmDialog from "@/components/delete-confirm-dialog" // Import DeleteConfirmDialog
+import { TenantDialog } from "@/components/tenants/tenant-dialog" // Import TenantDialog
+import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog" // Import DeleteConfirmDialog
 
 export default function TenantsPage() {
   const [tenants, setTenants] = useState<TenantResponse[]>([])

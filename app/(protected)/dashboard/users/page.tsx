@@ -11,8 +11,8 @@ import { Plus, Pencil, Trash2, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { DataTable, type ColumnDef } from "@/components/data-table"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import UserDialog from "@/components/user-dialog"
-import DeleteConfirmDialog from "@/components/delete-confirm-dialog"
+import { UserDialog } from "@/components/users/user-dialog"
+import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
 
 export default function UsersPage() {
   const [users, setUsers] = useState<UserResponse[]>([])
