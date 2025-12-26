@@ -6,7 +6,7 @@ El error "lockfile missing swc dependencies" ocurre debido a problemas con el lo
 
 Ejecuta los siguientes comandos en orden:
 
-```bash
+\`\`\`bash
 # 1. Elimina el lockfile actual y node_modules
 rm -rf node_modules yarn.lock
 
@@ -15,22 +15,22 @@ npm install
 
 # 3. Intenta hacer el build nuevamente
 npm run build
-```
+\`\`\`
 
 ## Alternativa si el problema persiste:
 
 Si el error continúa, asegúrate de tener Node.js actualizado:
 
-```bash
+\`\`\`bash
 node --version  # Debe ser v18 o superior
-```
+\`\`\`
 
 Y usa npm en lugar de yarn:
 
-```bash
+\`\`\`bash
 npm install
 npm run build
-```
+\`\`\`
 
 ## Por qué ocurre esto:
 

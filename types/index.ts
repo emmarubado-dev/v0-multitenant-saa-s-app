@@ -233,11 +233,22 @@ export interface RoleActionCreateRequest {
 
 // API Response Types
 export interface ApiError {
+  // Validation error format
   title?: string
   status?: number
   instance?: string
   traceId?: string
   errors?: Record<string, string[]>
+
+  // Simple error format
+  error?: {
+    code: string
+    description: string
+  }
+
+  // Server error format
+  detail?: string
+  stackTrace?: string
 }
 
 export interface PaginatedResponse<T> {
