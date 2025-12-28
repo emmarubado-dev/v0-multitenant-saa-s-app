@@ -7,6 +7,7 @@ export const tenantService = {
     return response.data
   },
 
+
   async getById(id: string): Promise<TenantResponse> {
     const response = await apiClient.get<TenantResponse>(`/api/V1/tenants/${id}`)
     return response.data

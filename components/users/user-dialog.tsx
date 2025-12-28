@@ -117,8 +117,50 @@ export function UserDialog({ open, onOpenChange, user, onSuccess }: UserDialogPr
     setSelectedRoles((prev) => (prev.includes(roleId) ? prev.filter((id) => id !== roleId) : [...prev, roleId]))
   }
 
+  /* -------------------------- VALIDACIÓN CLIENTE -------------------------- */
+
+  const validateForm = (): boolean => {
+    const errors: Record<string, string[]> = {}
+
+    if (!formData.firstName.trim()) errors.FirstName = ["El nombre es obligatorio"]
+    if (!formData.lastName.trim()) errors.LastName = ["El apellido es obligatorio"]
+    if (!formData.username.trim()) errors.Username = ["El usuario es obligatorio"]
+
+    if (!formData.email.trim()) {
+      errors.Email = ["El email es obligatorio"]
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errors.Email = ["El email no es válido"]
+    }
+
+    if (!user) {
+      if (!formData.password.trim()) {
+        errors.Password = ["La contraseña es obligatoria"]
+      } else if (formData.password.length < 6) {
+        errors.Password = ["Mínimo 6 caracteres"]
+      }
+    }
+
+    if (!formData.phoneCountryCode.trim()) errors.PhoneCountryCode = ["Requerido"]
+    if (!formData.phoneAreaCode.trim()) errors.PhoneAreaCode = ["Requerido"]
+    if (!formData.phoneNumber.trim()) errors.PhoneNumber = ["Requerido"]
+
+    setFieldErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
+  /* ---------------------------------- SUBMIT ---------------------------------- */
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (!validateForm()) {
+      toast({
+        title: "Formulario inválido",
+        description: "Revisa los campos marcados",
+        variant: "destructive",
+      })
+      return
+    }
 
     if (!selectedTenantId) {
       toast({
@@ -136,43 +178,30 @@ export function UserDialog({ open, onOpenChange, user, onSuccess }: UserDialogPr
       let userId: string
 
       if (user) {
-        const updateData: UpdateUserRequest = {
-          ...formData,
-          id: user.id,
-        }
+        const updateData: UpdateUserRequest = { ...formData, id: user.id }
         await userService.update(updateData)
         userId = user.id
-        toast({
-          title: "Éxito",
-          description: "Usuario actualizado correctamente",
-        })
+        toast({ title: "Éxito", description: "Usuario actualizado" })
       } else {
         const created = await userService.create(formData)
         userId = created.id
-        toast({
-          title: "Éxito",
-          description: "Usuario creado correctamente",
-        })
+        toast({ title: "Éxito", description: "Usuario creado" })
       }
 
-      if (selectedRoles.length > 0) {
-        await Promise.all(
-          selectedRoles.map((roleId) =>
-            userRoleService.assignRole({
-              userId,
-              roleId,
-              tenantId: selectedTenantId,
-            }),
-          ),
-        )
-      }
+      await Promise.all(
+        selectedRoles.map((roleId) =>
+          userRoleService.assignRole({
+            userId,
+            roleId,
+            tenantId: selectedTenantId,
+          }),
+        ),
+      )
 
       onSuccess()
       onOpenChange(false)
     } catch (error) {
-      const errors = getFieldErrors(error)
-      setFieldErrors(errors)
-
+      setFieldErrors(getFieldErrors(error))
       toast({
         title: "Error",
         description: getErrorMessage(error),
@@ -183,9 +212,7 @@ export function UserDialog({ open, onOpenChange, user, onSuccess }: UserDialogPr
     }
   }
 
-  const getFieldError = (fieldName: string): string | undefined => {
-    return fieldErrors[fieldName]?.[0]
-  }
+  const getFieldError = (field: string) => fieldErrors[field]?.[0]
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
